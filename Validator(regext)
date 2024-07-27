@@ -1,0 +1,23 @@
+const Validator = {
+    validateEmail(str) {
+        const result = /^(?<first>[\da-z]([\da-z\.+-]){1,19})@(?<second>[\w\.\!\$\%\&\’\*+/=\?\^-]){1,15}\.(?<end>[a-z]){1,5}$/i.test(str)
+        return result
+    },
+    validatePhone(str) {
+        let result = /^((?<country>\+\d{1,2})?[-\s]*(?<operator>\(?([-\s]*\d[-\s]*){3}\)?)(?<other>([-\s]*\d[-\s]*){7}))$/.test(str)
+        if (str.length > 25) {
+            result = false
+        }
+        return result
+    },
+    validatePassword(str) {
+        const result = /^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)\w{8,}$/u.test(str)
+        return result
+    }
+}
+console.log(Validator.validateEmail('first-part@.se=cond%p.art.end'))
+console.log(Validator.validateEmail('-firstpart@.se=cond%.enddeded'))
+console.log(Validator.validatePhone('+38 (099) 567 8901'))
+console.log(Validator.validatePhone('+38 (099) 567 8901 0'))
+console.log(Validator.validatePassword('SupperPas1'))
+console.log(Validator.validatePassword('Cool_pass'))
