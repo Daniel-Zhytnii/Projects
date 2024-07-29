@@ -1,0 +1,233 @@
+function Product(ID, name, description, price, brand, sizes, activeSize, quantity, date, images) {
+    this.ID = ID
+    this.getID = function() {
+        return this.ID
+    }
+    this.setID = function(ID) {
+        this.ID = ID
+    }
+
+    this.name = name
+    this.getName = function() {
+        return this.name
+    }
+    this.setName = function(name) {
+        this.name = name
+    }
+
+    this.description = description
+    this.getDescription = function() {
+        return this.description
+    }
+    this.setDescription = function(description) {
+        this.description = description
+    }
+
+    this.price = price
+    this.getPrice = function() {
+        return this.price
+    }
+    this.setPrice = function(price) {
+        this.price = price
+    }
+
+    this.brand = brand
+    this.getBrand = function() {
+        return this.brand
+    }
+    this.setBrand = function(brand) {
+        this.brand = brand
+    }
+
+    this.sizes = sizes
+    this.getSizes = function() {
+        return this.sizes
+    }
+    this.setSizes = function(sizes) {
+        this.sizes = sizes
+    }
+
+    this.activeSize = activeSize
+    this.getActiveSize = function() {
+        return this.activeSize
+    }
+    this.setActiveSize = function(activeSize) {
+        this.activeSize = activeSize
+    }
+
+    this.quantity = quantity
+    this.getQuantity = function() {
+        return this.quantity
+    }
+    this.setQuantity = function(quantity) {
+        this.quantity = quantity
+    }
+
+    this.date = date
+    this.getDate = function() {
+        return this.date
+    }
+    this.setDate = function(date) {
+        this.date = date
+    }
+
+    this.reviews = []
+    this.rating = []
+    this.getRating = function() {
+        return this.rating
+    }
+    this.getReviews = function() {
+        return this.reviews
+    }
+    this.setReviews = function(reviews) {
+        this.reviews = reviews
+    }
+
+    this.images = images
+    this.getImages = function() {
+        return this.images
+    }
+    this.setImages = function(images) {
+            this.images = images
+        }
+        //functions:
+    this.getReviewByID = function(ID) {
+        for (let index = 0; index < this.reviews.length; index++) {
+            if (this.reviews[index].ID === ID) {
+                return this.reviews[index]
+            }
+        }
+        return `Відгука з таким ID ще немає, але ви можете залишити свій`
+    }
+
+    this.getImage = function(oder) {
+        let result = this.images[oder - 1]
+        if (result == undefined) {
+            result = this.images[0]
+        }
+        return `Фотографія продукту: ${result}`
+    }
+
+    this.addSize = function(size) {
+        let result = (this.sizes).indexOf(size)
+        if (result == -1) {
+            this.sizes.push(size)
+        } else {
+            console.log('такий розмір вже є')
+        }
+    }
+
+    this.deleteSize = function(size) {
+        let result = (this.sizes).indexOf(size)
+        if (result == -1) {
+            console.log('такого розміру немає')
+        } else {
+            (this.sizes).splice(result, 1)
+        }
+    }
+
+    this.addReview = function(author, comment, rating) {
+        let ID = (this.reviews).length + 1
+        let date = new Date
+        let review = new Reviews(ID, author, date, comment, this.rating[ID - 1] = rating)
+        this.reviews.push(review)
+    }
+
+    this.deleteReview = function(ID) {
+        if (ID >= this.reviews.length || ID <= 0) {
+            console.log('такого відгука ще немає')
+        } else {
+            (this.reviews).splice(ID - 1, 1)
+            this.rating.splice(ID - 1, 1)
+            for (let index = ID - 1; index < this.reviews.length; index++) {
+                this.reviews[index].ID = this.reviews[index].ID - 1
+            }
+        }
+    }
+
+    this.getAverageRating = function() {
+        let result = 0
+        for (let i = 0; i < this.rating.length; i++) {
+            result = result + this.rating[i]
+        }
+        result = result / this.rating.length
+        return result
+    }
+}
+
+function Reviews(ID, author, date, comment, rating) {
+    this.ID = ID
+    this.author = author
+    this.date = date
+    this.comment = comment
+    this.rating = rating
+}
+
+let Product1 = new Product('1', 'Газований напій', 'Солодка, освіжаюча, з апетитними бульбашками газу', 100, "Coca cola", ['S', 'M', 'L'], "M", 999, "2009-08-21 21:15:44", ['https://www.coca-cola.com/content/dam/onexp/by/be/brands/coca-cola/by_coca-cola_prod_classic_750x750_v2.jpg', "https://myasoedov.com.ua/wp-content/uploads/2023/02/koka-kola-pet.jpg"])
+let Product2 = new Product('2', 'Газова запальничка', 'Надійний рятівник від холоду', 20, "LION", ['S', 'M'], "M", 999, "2009-08-21 21:15:44", ['https://cdn.27.ua/799/cd/5b/6409563_1.jpeg', "https://docs.monopoliya.net/data/images/Tovar/432001142/326423-origin.jpg]"])
+let Product3 = new Product('3', 'Шоколадка', 'Солодка, з хрумтячою карамелю', 200, "Milka", ['S', 'M', 'L'], "M", 999, "2009-08-21 21:15:44", ['https://images.prom.ua/4346957115_w640_h640_shokolad-milka-300g.jpg', "https://nuga.com.ua/image/catalog/products/1/Shokolad-Milka-oreo-Milka-oreo-100g.jpg"])
+let Product4 = new Product('4', 'Молоко', 'Натуральне, тільки з під корови', 159, "Своя лінія", ['S', 'M', 'L'], "M", 999, "2009-08-21 21:15:44", ['https://src.zakaz.atbmarket.com/cache/photos/12370/catalog_product_main_12370.jpg', "https://src.zakaz.atbmarket.com/cache/photos/54071/catalog_product_main_54071.jpg"])
+let Product5 = new Product('5', 'Молоко', 'Лише зі здорових корів', 150, "Ферма", ['S', 'M', 'L'], "M", 999, "2009-08-21 21:15:44", ['https://src.zakaz.atbmarket.com/cache/photos/2112/catalog_product_main_2112.jpg', "https://vitamin-advertising.com/wp-content/uploads/2016/02/FERMA_VIS_2-3.jpg"])
+let Product6 = new Product('6', 'Сир', 'Натуральний, коров`ячий', 234, "Яготинський", ['S', 'M', 'L'], "M", 999, "2009-08-21 21:15:44", ['https://img.fozzyshop.com.ua/dnipro/210833-thickbox_default/syr-yagotinskij-adygejskij-45.jpg', "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNuXydcFi-WuB78HpZfU5lx-kdh7bTfq15wvwOIwHEQjSWBY4YNd3R0K-rTEvu4s87yEU&usqp=CAU"])
+let Product7 = new Product('7', 'Сирковий продукт', 'Глазурований молоковмісний з журавлиною', 45, "Богодухівський", ['S', 'M', 'L'], "M", 999, "2009-08-21 21:15:44", ['https://varus.ua/img/product/1140/1140/2634408', "https://hodosovka.megamarket.ua/files/products/4820141405993_1.800x600.jpg"])
+let products = [Product1, Product2, Product3, Product4, Product5, Product6, Product7]
+
+let names = ['John', 'Mary', 'Michael', 'Jennifer', 'James', 'Elizabeth', 'David', 'Sarah', 'William', 'Emily', 'Robert', 'Jessica', 'Joseph', 'Emma', 'Richard', 'Samantha', 'Thomas', 'Ashley', 'Christopher', 'Olivia']
+    //for reviews
+for (let index = 0; index < products.length; index++) {
+    for (let i = 0; i < 3; i++) {
+        let author = Math.floor(Math.random() * names.length)
+        let rating = Math.floor(Math.random() * 11)
+        products[index].addReview(author, '*-*', rating)
+    }
+}
+
+function search(products, word) {
+    let result = []
+    word = word.toLowerCase().trim()
+    console.log(`Your search:${word}`)
+    for (let index = 0; index < products.length; index++) {
+        if ((products[index].name.toLowerCase()).includes(word) || (products[index].description.toLowerCase()).includes(word)) {
+            result.push(products[index])
+        }
+    }
+    return result
+}
+//console.log(search(products, '    сир    '))
+
+//rule: High/low price, High/low ID, High/low name 
+function sort(products, rules) {
+    rules = rules.toLowerCase().trim()
+    console.log(`Your rule:${rules}`)
+    if (rules.includes('price')) {
+        if (rules.includes('low')) {
+            products.sort((a, b) => a.price - b.price)
+        } else if (rules.includes('high')) {
+            products.sort((a, b) => b.price - a.price)
+        }
+    } else if (rules.includes('id')) {
+        if (rules.includes('low')) {
+            products.sort((a, b) => a.ID - b.ID)
+        } else if (rules.includes('high')) {
+            products.sort((a, b) => b.ID - a.ID)
+        }
+    } else if (rules.includes('name')) {
+        if (rules.includes('low')) {
+            products.sort((a, b) => {
+                const nameA = a.name.toLowerCase()
+                const nameB = b.name.toLowerCase()
+                return nameA.localeCompare(nameB);
+            })
+        } else if (rules.includes('high')) {
+            products.sort((a, b) => {
+                const nameA = a.name.toLowerCase()
+                const nameB = b.name.toLowerCase()
+                return nameB.localeCompare(nameA);
+            })
+        }
+    } else {
+        console.log('Your rule is incorrect')
+    }
+    return products
+}
+//console.log(sort(products, 'low name'))
