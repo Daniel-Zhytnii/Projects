@@ -1,0 +1,145 @@
+function Counter(initialValue = 0) {
+  this.count = initialValue
+}
+
+/*Counter.prototype.increment = function () {
+    this.count += 1
+    // возвращаем this, чтобы иметь возможность выстраивания цепочки из вызовов методов
+    return this
+  }
+  
+Counter.prototype.decrement = function () {
+    this.count -= 1
+    return this
+  }
+  
+Counter.prototype.reset = function () {
+    this.count = 0
+    return this
+  }
+  
+Counter.prototype.getInfo = function () {
+    console.log(this.count)
+    return this
+  }
+*/
+Object.assign(Counter.prototype, {
+    increment() {
+      this.count += 1
+      return this
+    },
+  
+    decrement() {
+      this.count -= 1
+      return this
+    },
+  
+    reset() {
+      this.count = 0
+      return this
+    },
+  
+    getInfo() {
+      console.log(this.count)
+      return this
+    }
+  })//more optimisate
+const counter = new Counter()
+
+// with class
+class _Counter {
+    constructor(initialValue = 0) {
+      this.count = initialValue
+    }
+  
+    increment() {
+      this.count += 1
+      return this
+    }
+  
+    decrement() {
+      this.count -= 1
+      return this
+    }
+  
+    reset() {
+      this.count = 0
+      return this
+    }
+  
+    getInfo() {
+      console.log(this.count)
+      return this
+    }
+  }
+  
+  const _counter = new _Counter()
+
+///////////////////////////////////////////////////////
+function Person1(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+  
+  Person1.prototype.greet = function() {
+    console.log(`Hi, my name is ${this.name}`);
+  };
+  
+  const john1 = new Person1('John', 30);
+  john1.greet(); // "Hi, my name is John"
+//class
+class Person {
+    constructor(name, age) {
+      this.name = name;
+      this.age = age;
+    }
+  
+    greet() {
+      console.log(`Hi, my name is ${this.name}`);
+    }
+  }
+  
+  const marco1 = new Person('John', 30);
+  marco1.greet(); // "Hi, my name is John"
+
+/*Основные различия:
+
+    Синтаксис:
+        Функции-конструкторы выглядят как обычные функции. Для методов, которые будут у всех объектов, нужно использовать prototype.
+        Классы предлагают более удобный и читаемый синтаксис, который ближе к другим объектно-ориентированным языкам (например, Java или Python). Методы классов объявляются внутри класса без необходимости работы с prototype.
+
+    Наследование:
+        Функции-конструкторы используют механизм прототипов для наследования: */
+
+        function Employee1(name, age, position) {
+            Person1.call(this, name, age); // Наследуем свойства name и age(Метод call() позволяет выполнить функцию Person в контексте текущего объекта this)
+            this.position = position; // Добавляем новое свойство position
+          }
+          
+          Employee1.prototype = Object.create(Person1.prototype); // Наследуем методы Person(Object.create(Person.prototype) создает новый объект, который наследует от Person.prototype.)
+          Employee1.prototype.constructor = Employee1; /* Исправляем constructor(По умолчанию при изменении прототипа через Object.create(), 
+          свойство constructor объекта будет указывать на функцию-конструктор родителя, в данном случае на Person. Чтобы исправить это и указать,
+          что конструктором для объектов Employee является именно Employee, явно переопределяется constructor.)*/
+
+//class Классы поддерживают более простой синтаксис наследования через extends:
+
+class Employee extends Person {//Это объявление нового класса Employee, который наследует (extends) свойства и методы класса Person.
+    constructor(name, age, position) {
+      super(name, age); // Вызов конструктора родительского класса
+      this.position = position; // Инициализация нового свойства position
+    }
+  }
+  
+  const marco = new Employee('John', 30, 'Developer');
+  marco.greet(); // "Hi, my name is marco"
+  console.log(marco.position); // "Developer"
+  
+/*Ключевое слово new:
+
+    Функции-конструкторы требуют явного использования new для создания объектов. Если вызвать функцию-конструктор без new, это может привести к ошибкам.
+    Классы требуют использовать new при создании объектов, и попытка создать объект без new вызовет ошибку.
+
+Поведение this:
+
+    В функциях-конструкторах, если не использовать new, this может не ссылаться на новый объект, что может привести к непредсказуемому поведению.
+    В классах такой проблемы нет, поскольку JavaScript автоматически следит за тем, чтобы this работало правильно внутри методов класса. */
