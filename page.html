@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basketball Throw Simulation</title>
+</head>
+<style>
+  .horizontal-list {
+    display: flex;
+    justify-content: space-around;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  .horizontal-list li {
+    margin: 0 10px;
+  }
+</style>
+<body>
+    <h1 id="title"><b>Basketball Throw(Technologies task)</b></h1>
+    <ul class="horizontal-list"><b><li id="time"></li></b>
+        <b><li id="accuracy"></li></b>
+        <li id="angel"></li>
+        <li id="Velocity0"></li>
+        <li id="ball coordinate"></li>
+        <li id="basket coordinate"></li>
+    </ul>
+    <canvas id="trajectoryCanvas" width="800" height="600" ></canvas>
+    <script>
+        const x0 = 0;  
+        const y0 = 2;  
+        const v0 = 11; 
+        const angel = 60
+        const g = 9.81; 
+        const basketX = 10; 
+        const basketY = 3; 
+        //canvas settings
+        const canvas = document.getElementById('trajectoryCanvas');
+        const ctx = canvas.getContext('2d');
+
+        //coordinate for ball
+        function calculateX(t) {
+            return v0 * Math.cos(degreesToRadians(angel)) * t + x0;
+        }
+        function calculateY(t) {
+            return -0.5 * g * t * t + v0 * Math.sin(degreesToRadians(angel)) * t + y0;
+        }
+
+        // degrees to radians
+        function degreesToRadians(degrees) {
+            return degrees * (Math.PI / 180);
+        }
+
+        //built trajectory
+        function simulateTrajectory() {
+            const dataX = [];
+            const dataY = [];
+            let t = 0;
+            const deltaT = 0.1;
+
+            while (true) {
+                const x = calculateX(t);
+                const y = calculateY(t);
+                if (y < 0) break;
+
+                dataX.push(x);
+                dataY.push(y);
+                t += deltaT;
+            }
+            return { dataX, dataY,t};
+        }
+        const { dataX, dataY,t } = simulateTrajectory();
+        // paint trajectory
+        function drawTrajectory() {
+            const { dataX, dataY,t } = simulateTrajectory();
+        //масштаб для координат
+            const scaleX = 60; 
+            const scaleY = 80; 
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.beginPath();
+            ctx.moveTo(dataX[0] * scaleX, canvas.height - dataY[0] * scaleY); 
+            for (let i = 1; i < dataX.length; i++) {
+                ctx.lineTo(dataX[i] * scaleX, canvas.height - dataY[i] * scaleY);
+            }
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // paint basket
+            ctx.beginPath()
+            ctx.moveTo((basketX-1)* scaleX,canvas.height - basketY * scaleY)
+            ctx.lineTo((basketX+1)* scaleX,canvas.height - basketY * scaleY);
+            ctx.strokeStyle = 'green';
+            ctx.stroke(); 
+
+            //paint cordinate system
+            ctx.beginPath()
+            ctx.moveTo(0,canvas.height - dataY[dataY.length - 1] * scaleY);   
+            ctx.lineTo(800,canvas.height - dataY[dataY.length - 1] * scaleY);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2
+            ctx.stroke(); 
+
+            ctx.beginPath()
+            ctx.moveTo((basketX)* scaleX,0);   
+            ctx.lineTo((basketX)* scaleX,600);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2
+            ctx.stroke(); 
+        }
+        function calculateTime(y0, y, v0, angel, g) {
+            // Перетворюємо кут у радіани
+            const thetaRad = degreesToRadians(angel);
+            
+            // Обчислюємо частини формули
+            const a = -0.5 * g;
+            const b = v0 * Math.sin(thetaRad);
+            const c = y0 - y;
+
+            // Дискримінант
+            const discriminant = Math.pow(b, 2) - 4 * a * c;
+
+            if (discriminant < 0) {
+                return null;  // Немає реального кореня (коли м'яч не досягає висоти y)
+            }
+            if(discriminant==0){
+                return null //значить 1 корінь рівняння і м'яч пішов по дотичній до висоти
+            }
+            // Обчислюємо два можливі значення часу
+            const t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+            const t2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+            // Обираємо позитивний час
+            return Math.max(t1, t2);
+        }
+        function accuracy(){
+            const { dataX, dataY} = simulateTrajectory();
+            const timeToBasket = calculateTime(y0, basketY, v0, angel, g)
+            const accuracyResult = Math.abs(basketX- calculateX(timeToBasket))
+            if(accuracyResult>1){
+                return `м'яч не потрапив до кошика`
+            }else{
+                console.log(accuracyResult)
+            return accuracyResult
+            }
+        }
+        accuracy()
+        drawTrajectory();
+        document.getElementById("time").innerHTML = `time=${t}`;
+        document.getElementById("accuracy").innerHTML = `accuracy=${accuracy()}`;
+        document.getElementById("angel").innerHTML = `angel=${angel}`;
+        document.getElementById("Velocity0").innerHTML = `Velocity0=${v0}`;
+        document.getElementById("ball coordinate").innerHTML = `ball coordinate=(${[x0,y0]})`;
+        document.getElementById("basket coordinate").innerHTML = `basket coordinate=(${[basketX,basketY]})`;
+    </script>
+</body>
+</html>
