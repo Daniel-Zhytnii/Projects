@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basketball Throw Simulation</title>
+</head>
+<style>
+  .horizontal-list {
+    display: flex;
+    justify-content: space-around;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  .horizontal-list li {
+    margin: 0 10px;
+  }
+</style>
+<body>
+    <h1 id="title"><b>Basketball Throw Simulation</b></h1>
+    <div>    
+        <ul class="horizontal-list">
+            <li>
+                <p>Ball Coordinate</p>
+                <input type="text" value="0,2" id="ballCoord">
+            </li>
+            <li>
+                <p>Basket Coordinate</p>
+                <input type="text" value="10,3" id="basketCoord">
+            </li>
+            <li>
+                <p>Angle (degrees)</p>
+                <input type="text" value="60" id="inputAngle">
+            </li>
+            <li>
+                <p>Initial Velocity (m/s)</p>
+                <input type="text" value="11" id="inputVelocity">
+            </li>   
+        </ul>
+        <button id="drawTrajectory">Draw Trajectory</button>
+        <b><p id="result"></p></b>
+        <p id="time"></p>
+        <p id="accuracy"></p>
+    </div>
+
+    <canvas id="trajectoryCanvas" width="800" height="600"></canvas>
+    <script>
+        const g = 9.81;
+
+        // Функция преобразования градусов в радианы
+        function degreesToRadians(degrees) {
+            return degrees * (Math.PI / 180);
+        }
+
+        function calculateX(t, v0, angle, x0) {
+            return v0 * Math.cos(degreesToRadians(angle)) * t + x0;
+        }
+        function calculateY(t, v0, angle, y0) {
+            return -0.5 * g * t * t + v0 * Math.sin(degreesToRadians(angle)) * t + y0;
+        }
+
+        // Симуляция траектории
+        function simulateTrajectory(v0, angle, x0, y0) {
+            const dataX = [];
+            const dataY = [];
+            let t = 0;
+            const deltaT = 0.1;
+
+            while (true) {
+                const x = calculateX(t, v0, angle, x0);
+                const y = calculateY(t, v0, angle, y0);
+                if (y < 0) break;
+
+                dataX.push(x);
+                dataY.push(y);
+                t += deltaT;
+            }
+            return { dataX, dataY, t };
+        }
+
+        function accuracy(accuracyResult){
+            console.log(`accuracy=${accuracyResult}`)
+            if(accuracyResult>0.7){
+                const bool= false
+                const str = `м'яч не потрапив до кошика`
+                console.log({str,bool})
+                return {accuracyResult,str,bool}
+            }else{
+                const bool= true
+                console.log({accuracyResult,bool})
+            return {accuracyResult,bool}
+            }
+        }
+
+        function calculateTime(y0, basketY, v0,angle, g) {
+            // Перетворюємо кут у радіани
+            const thetaRad = degreesToRadians(angle);
+            
+            // Обчислюємо частини формули
+            const a = -0.5 * g;
+            const b = v0 * Math.sin(thetaRad);
+            const c = y0 - basketY;
+
+            // Дискримінант
+            const discriminant = Math.pow(b, 2) - 4 * a * c;
+
+            if (discriminant < 0) {
+                return null;  // Немає реального кореня (коли м'яч не досягає висоти y)
+            }
+            if(discriminant==0){
+                return null //значить 1 корінь рівняння і м'яч пішов по дотичній до висоти
+            }
+            // Обчислюємо два можливі значення часу
+            const t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+            const t2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+            // Обираємо позитивний час
+            return Math.max(t1, t2);
+        }
+        
+        // Функция отрисовки траектории
+        function drawTrajectory() {
+            const canvas = document.getElementById('trajectoryCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Очищаем холст перед каждой новой отрисовкой
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+            const ballCoord = document.getElementById('ballCoord').value.split(',').map(Number);
+            const basketCoord = document.getElementById('basketCoord').value.split(',').map(Number);
+            const angle = parseFloat(document.getElementById('inputAngle').value);
+            const v0 = parseFloat(document.getElementById('inputVelocity').value);
+
+            const x0 = ballCoord[0];
+            const y0 = ballCoord[1];
+            const basketX = basketCoord[0];
+            const basketY = basketCoord[1];
+
+            const { dataX, dataY, t } = simulateTrajectory(v0, angle, x0, y0);
+
+            const scaleX = 60; 
+            const scaleY = 80; 
+
+            // Отрисовка траектории мяча
+            ctx.beginPath();
+            ctx.moveTo(dataX[0] * scaleX, canvas.height - dataY[0] * scaleY); 
+            for (let i = 1; i < dataX.length; i++) {
+                ctx.lineTo(dataX[i] * scaleX, canvas.height - dataY[i] * scaleY);
+            }
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Отрисовка кольца (корзины)
+            ctx.beginPath();
+            ctx.moveTo((basketX - 0.7) * scaleX, canvas.height - basketY * scaleY );
+            ctx.lineTo((basketX + 0.7) * scaleX, canvas.height - basketY * scaleY); // ширина кольца 1 единица
+            ctx.strokeStyle = 'green';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Система координат
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height - dataY[dataY.length - 1] * scaleY);
+            ctx.lineTo(800, canvas.height - dataY[dataY.length - 1] * scaleY);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(basketX * scaleX, 0);
+            ctx.lineTo(basketX * scaleX, canvas.height);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            const timeToBasket = calculateTime(y0, basketY, v0, angle, g)
+            const accuracyEnd = Math.abs(basketX- calculateX(timeToBasket, v0, angle, x0))
+            const {accuracyResult,str,bool}= accuracy(accuracyEnd)
+            
+            let result = (bool === true) ? bool : str;
+
+            document.getElementById("time").innerHTML = `time=${t}`;
+            document.getElementById("accuracy").innerHTML = `accuracy=${accuracyResult}`;
+            document.getElementById("result").innerHTML = `М'яч влучив в кільце=${result}`
+        }
+
+        // Обработка события нажатия кнопки
+        const button = document.getElementById('drawTrajectory');
+        button.addEventListener('click', () => {
+            drawTrajectory();
+            });
+    </script>
+</body>
+</html>
