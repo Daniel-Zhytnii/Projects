@@ -16,6 +16,22 @@
   .horizontal-list li {
     margin: 0 10px;
   }
+
+  table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
 </style>
 <body>
     <h1 id="title"><b>Basketball Throw Simulation</b></h1>
@@ -45,10 +61,38 @@
     </div>
 
     <canvas id="trajectoryCanvas" width="800" height="600"></canvas>
+    <h2>Таблиця даних траєкторії</h2>
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Час (с)</th>
+                <th>Швидкість по X (м/с)</th>
+                <th>Швидкість по Y (м/с)</th>
+                <th>Позиція по X (м)</th>
+                <th>Позиція по Y (м)</th>
+                <th>Швидкість по X (з опором) (м/с)</th>
+                <th>Швидкість по Y (з опором) (м/с)</th>
+                <th>Позиція по X (з опором) (м)</th>
+                <th>Позиція по Y (з опором) (м)</th>
+                <th>Похибка швидкості відносно Х</th>
+                <th>Похибка швидкості відносно У</th>
+                <th>Похибка відстані по Х</th>
+                <th>Похибка відстані по У</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
     <script>
         const g = 9.81;
+        const pi=3.14
+        const ballRadius=0.51
+        const mu = 0.0182
+        const massaBall = 0.6
+        const k_op= pi*ballRadius*mu*6
+        const m_k= massaBall/k_op
 
-        // Функция преобразования градусов в радианы
+        // degrees to radian
         function degreesToRadians(degrees) {
             return degrees * (Math.PI / 180);
         }
@@ -59,8 +103,7 @@
         function calculateY(t, v0, angle, y0) {
             return -0.5 * g * t * t + v0 * Math.sin(degreesToRadians(angle)) * t + y0;
         }
-
-        // Симуляция траектории
+//build trajectory
         function simulateTrajectory(v0, angle, x0, y0) {
             const dataX = [];
             const dataY = [];
@@ -94,15 +137,12 @@
         }
 
         function calculateTime(y0, basketY, v0,angle, g) {
-            // Перетворюємо кут у радіани
             const thetaRad = degreesToRadians(angle);
             
-            // Обчислюємо частини формули
             const a = -0.5 * g;
             const b = v0 * Math.sin(thetaRad);
             const c = y0 - basketY;
 
-            // Дискримінант
             const discriminant = Math.pow(b, 2) - 4 * a * c;
 
             if (discriminant < 0) {
@@ -111,21 +151,19 @@
             if(discriminant==0){
                 return null //значить 1 корінь рівняння і м'яч пішов по дотичній до висоти
             }
+
             // Обчислюємо два можливі значення часу
             const t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
             const t2 = (-b - Math.sqrt(discriminant)) / (2 * a);
             // Обираємо позитивний час
             return Math.max(t1, t2);
         }
-        
-        // Функция отрисовки траектории
+//paint trajectory
         function drawTrajectory() {
             const canvas = document.getElementById('trajectoryCanvas');
             const ctx = canvas.getContext('2d');
 
-            // Очищаем холст перед каждой новой отрисовкой
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
 
             const ballCoord = document.getElementById('ballCoord').value.split(',').map(Number);
             const basketCoord = document.getElementById('basketCoord').value.split(',').map(Number);
@@ -142,7 +180,7 @@
             const scaleX = 60; 
             const scaleY = 80; 
 
-            // Отрисовка траектории мяча
+            // paint trajectory
             ctx.beginPath();
             ctx.moveTo(dataX[0] * scaleX, canvas.height - dataY[0] * scaleY); 
             for (let i = 1; i < dataX.length; i++) {
@@ -152,44 +190,118 @@
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Отрисовка кольца (корзины)
+            // paint basket
             ctx.beginPath();
             ctx.moveTo((basketX - 0.7) * scaleX, canvas.height - basketY * scaleY );
-            ctx.lineTo((basketX + 0.7) * scaleX, canvas.height - basketY * scaleY); // ширина кольца 1 единица
+            ctx.lineTo((basketX + 0.7) * scaleX, canvas.height - basketY * scaleY); // ширина кільця 1 одиниця
             ctx.strokeStyle = 'green';
             ctx.lineWidth = 3;
             ctx.stroke();
 
-            // Система координат
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height - dataY[dataY.length - 1] * scaleY);
-            ctx.lineTo(800, canvas.height - dataY[dataY.length - 1] * scaleY);
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(basketX * scaleX, 0);
-            ctx.lineTo(basketX * scaleX, canvas.height);
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            const timeToBasket = calculateTime(y0, basketY, v0, angle, g)
-            const accuracyEnd = Math.abs(basketX- calculateX(timeToBasket, v0, angle, x0))
-            const {accuracyResult,str,bool}= accuracy(accuracyEnd)
+            const timeToBasket = calculateTime(y0, basketY, v0, angle, g);
+            const accuracyEnd = Math.abs(basketX - calculateX(timeToBasket, v0, angle, x0));
+            const { accuracyResult, str, bool } = accuracy(accuracyEnd);
             
             let result = (bool === true) ? bool : str;
 
             document.getElementById("time").innerHTML = `time=${t}`;
             document.getElementById("accuracy").innerHTML = `accuracy=${accuracyResult}`;
-            document.getElementById("result").innerHTML = `М'яч влучив в кільце=${result}`
+            document.getElementById("result").innerHTML = `М'яч влучив в кільце=${result}`;
+
+            // Заповнюємо таблицю після обчислень
+    let dataTables = []; // Ініціалізуємо масив правильно
+    for (let time = 0; time < t; time = time + 0.05) {
+        dataTables.push(calculateTrajectory(v0, angle, massaBall, k_op, g, time, x0, y0));
+    }
+    return dataTables
+}
+
+function insertDataToTable(dataTables) {
+    const tableBody = document.querySelector('#data-table tbody');
+    tableBody.innerHTML = "";  // Очищуємо таблицю перед вставкою нових даних
+
+    dataTables.forEach((data) => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td>${data.time.toFixed(2)}</td>
+            <td>${data.velocityX.toFixed(2)}</td>
+            <td>${data.velocityY.toFixed(2)}</td>
+            <td>${data.positionX.toFixed(2)}</td>
+            <td>${data.positionY.toFixed(2)}</td>
+            <td>${data.velocityXAir.toFixed(2)}</td>
+            <td>${data.velocityYAir.toFixed(2)}</td>
+            <td>${data.positionXAir.toFixed(2)}</td>
+            <td>${data.positionYAir.toFixed(2)}</td>
+            <td>${data.measurementVx.toFixed(2)}</td>
+            <td>${data.measurementVy.toFixed(2)}</td>
+            <td>${data.measurementX.toFixed(2)}</td>
+            <td>${data.measurementY.toFixed(2)}</td>
+        `;
+
+        tableBody.appendChild(row);
+    });
         }
 
-        // Обработка события нажатия кнопки
+        function calculateTrajectory(v0, angle, massaBall, k_op, g, time,x0,y0){
+            let angleRad = degreesToRadians(angle)
+
+            let vx0 = v0 * Math.cos(angleRad);
+            let vy0 = v0 * Math.sin(angleRad);
+            
+            function vy(t){
+                return vy0*t-(g*t**2)*0.5
+            }
+            
+            function vxAir(t) {
+                return vx0 * Math.exp(-k_op * t / massaBall);
+            }
+
+            function vyAir(t) {
+                return (vy0 + (massaBall * g / k_op)) * Math.exp(-k_op * t / massaBall) - (massaBall * g / k_op);
+            }
+
+            function xAir(t) {
+                return (massaBall / k_op) * vx0 * (1 - Math.exp(-k_op * t / massaBall));
+            }
+
+            function yAir(t) {
+                return (massaBall * g / k_op) * t + ((vy0 + massaBall * g / k_op) * (massaBall / k_op)) * (1 - Math.exp(-k_op * t / massaBall));
+            }
+
+            let velocityXAir = vxAir(time);
+            let velocityYAir = vyAir(time);
+            let velocityX = vx0;
+            let velocityY = vy(time);
+            let positionXAir = xAir(time);
+            let positionYAir = yAir(time);
+            let positionX = calculateX(time, v0, angle, x0);
+            let positionY = calculateY(time, v0, angle, y0);
+
+            let measurementVx= Math.abs(velocityX-velocityXAir)
+            let measurementVy=Math.abs(velocityY-velocityYAir)
+            let measurementX=Math.abs(positionX-positionXAir)
+            let measurementY=Math.abs(positionY-positionYAir)
+
+            return {
+                time:time,
+                velocityX:velocityX,
+                velocityY:velocityY,
+                positionX: positionX,
+                positionY: positionY,
+                velocityXAir: velocityXAir,
+                velocityYAir: velocityYAir,
+                positionXAir: positionXAir,
+                positionYAir: positionYAir,
+                measurementVx:measurementVx,
+                measurementVy:measurementVy,
+                measurementX:measurementX,
+                measurementY:measurementY
+            }
+        }
         const button = document.getElementById('drawTrajectory');
         button.addEventListener('click', () => {
-            drawTrajectory();
+            insertDataToTable(drawTrajectory());
             });
     </script>
 </body>
