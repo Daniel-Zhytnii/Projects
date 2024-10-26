@@ -67,16 +67,16 @@
             <tr>
                 <th>Час (с)</th>
                 <th>Швидкість по X (м/с)</th>
-                <th>Швидкість по Y (м/с)</th>
-                <th>Позиція по X (м)</th>
-                <th>Позиція по Y (м)</th>
                 <th>Швидкість по X (з опором) (м/с)</th>
-                <th>Швидкість по Y (з опором) (м/с)</th>
-                <th>Позиція по X (з опором) (м)</th>
-                <th>Позиція по Y (з опором) (м)</th>
                 <th>Похибка швидкості відносно Х</th>
+                <th>Швидкість по Y (м/с)</th>
+                <th>Швидкість по Y (з опором) (м/с)</th>
                 <th>Похибка швидкості відносно У</th>
+                <th>Позиція по X (м)</th>
+                <th>Позиція по X (з опором) (м)</th>
                 <th>Похибка відстані по Х</th>
+                <th>Позиція по Y (м)</th>
+                <th>Позиція по Y (з опором) (м)</th>
                 <th>Похибка відстані по У</th>
             </tr>
         </thead>
@@ -198,6 +198,21 @@
             ctx.lineWidth = 3;
             ctx.stroke();
 
+            //paint cordinate system
+            ctx.beginPath()
+            ctx.moveTo(0,canvas.height - dataY[dataY.length - 1] * scaleY);   
+            ctx.lineTo(800,canvas.height - dataY[dataY.length - 1] * scaleY);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2
+            ctx.stroke(); 
+
+            ctx.beginPath()
+            ctx.moveTo((basketX)* scaleX,0);   
+            ctx.lineTo((basketX)* scaleX,600);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2
+            ctx.stroke(); 
+
             const timeToBasket = calculateTime(y0, basketY, v0, angle, g);
             const accuracyEnd = Math.abs(basketX - calculateX(timeToBasket, v0, angle, x0));
             const { accuracyResult, str, bool } = accuracy(accuracyEnd);
@@ -226,16 +241,16 @@ function insertDataToTable(dataTables) {
         row.innerHTML = `
             <td>${data.time.toFixed(2)}</td>
             <td>${data.velocityX.toFixed(2)}</td>
-            <td>${data.velocityY.toFixed(2)}</td>
-            <td>${data.positionX.toFixed(2)}</td>
-            <td>${data.positionY.toFixed(2)}</td>
             <td>${data.velocityXAir.toFixed(2)}</td>
-            <td>${data.velocityYAir.toFixed(2)}</td>
-            <td>${data.positionXAir.toFixed(2)}</td>
-            <td>${data.positionYAir.toFixed(2)}</td>
             <td>${data.measurementVx.toFixed(2)}</td>
+            <td>${data.velocityY.toFixed(2)}</td>
+            <td>${data.velocityYAir.toFixed(2)}</td>
             <td>${data.measurementVy.toFixed(2)}</td>
+            <td>${data.positionX.toFixed(2)}</td>
+            <td>${data.positionXAir.toFixed(2)}</td>
             <td>${data.measurementX.toFixed(2)}</td>
+            <td>${data.positionY.toFixed(2)}</td>
+            <td>${data.positionYAir.toFixed(2)}</td>
             <td>${data.measurementY.toFixed(2)}</td>
         `;
 
@@ -250,7 +265,7 @@ function insertDataToTable(dataTables) {
             let vy0 = v0 * Math.sin(angleRad);
             
             function vy(t){
-                return vy0*t-(g*t**2)*0.5
+                return vy0 - g*t
             }
             
             function vxAir(t) {
@@ -258,7 +273,7 @@ function insertDataToTable(dataTables) {
             }
 
             function vyAir(t) {
-                return (vy0 + (massaBall * g / k_op)) * Math.exp(-k_op * t / massaBall) - (massaBall * g / k_op);
+                return (vy0 + (massaBall * g) / k_op) * Math.exp(-k_op * t / massaBall) - (massaBall * g) / k_op;
             }
 
             function xAir(t) {
@@ -266,7 +281,7 @@ function insertDataToTable(dataTables) {
             }
 
             function yAir(t) {
-                return (massaBall * g / k_op) * t + ((vy0 + massaBall * g / k_op) * (massaBall / k_op)) * (1 - Math.exp(-k_op * t / massaBall));
+                return  ((vy0 + (massaBall * g) / k_op) * (massaBall / k_op)) * (1 - Math.exp(-k_op * t / massaBall))-(massaBall * g / k_op) * t;
             }
 
             let velocityXAir = vxAir(time);
